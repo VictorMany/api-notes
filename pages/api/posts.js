@@ -10,7 +10,7 @@ async function getNotes(req, res) {
             .sort({ published: -1, createdAt: -1 })
             .toArray();
 
-        return res.json({ message: JSON.parse(JSON.stringify(notes)), success: true });
+        return res.json({ message: "Getting notes successfully", data: JSON.parse(JSON.stringify(notes)), success: true });
     } catch (error) {
         return res.status(500).json({ message: error.message, success: false });
     }
@@ -20,10 +20,9 @@ async function addNote(req, res) {
     try {
         const { db } = await connectToDatabase();
         const note = JSON.parse(req.body);
-
-        await db.collection('notes').insertOne(note);
-
-        return res.json({ message: 'Note added successfully', success: true });
+        const result = await db.collection('notes').insertOne(note);
+        const insertedNote = await db.collection('notes').findOne({ _id: result.insertedId });
+        return res.json({ message: 'Note added successfully', success: true, data: insertedNote });
     } catch (error) {
         return res.status(500).json({ message: error.message, success: false });
     }
