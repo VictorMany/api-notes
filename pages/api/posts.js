@@ -7,7 +7,7 @@ async function getNotes(req, res) {
         const notes = await db
             .collection('notes')
             .find({})
-            .sort({ published: -1, createdAt: -1 })
+            .sort({ published: 1, createdAt: 1 })
             .toArray();
 
         return res.json({ message: "Getting notes successfully", data: JSON.parse(JSON.stringify(notes)), success: true });
