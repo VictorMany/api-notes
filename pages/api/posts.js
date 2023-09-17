@@ -31,11 +31,20 @@ async function addNote(req, res) {
 async function updateNote(req, res) {
     try {
         const { db } = await connectToDatabase();
-        const noteId = new ObjectId(req.body);
 
-        await db.collection('notes').updateOne({ _id: noteId }, { $set: { published: true } });
+        const payload = JSON.parse(req.body);
+        const noteId = new ObjectId(payload.id);
 
-        return res.json({ message: 'Note updated successfully', success: true });
+        const result = await db.collection('notes').updateOne({ _id: noteId }, {
+            $set: {
+                is_completed: payload.is_completed,
+                title: payload.title, // Update the 'title' field
+                details: payload.details, // Update the 'content' field
+                due_date: payload.due_date // Update the 'content' field
+            }
+        });
+        const insertedNote = await db.collection('notes').findOne({ _id: result.insertedId });
+        return res.json({message: 'Note updated successfully', success: true, data: insertedNote });
     } catch (error) {
         return res.status(500).json({ message: error.message, success: false });
     }
