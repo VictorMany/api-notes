@@ -11,7 +11,6 @@ export default function preview(url) {
     headers.append('Accept', 'application/json');
     headers.append('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
 
-    headers.append('Access-Control-Allow-Origin', 'http://localhost:8080');
     headers.append('Access-Control-Allow-Origin', '*');
 
     // add the CORS headers to the response
