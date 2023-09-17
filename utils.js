@@ -6,11 +6,7 @@ export default function preview(url) {
     let headers = new Headers();
     headers.append('Content-Type', 'application/text');
     headers.append('Accept', 'application/json');
-
-    headers.append('Content-Type', 'application/text');
-    headers.append('Accept', 'application/json');
     headers.append('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-
     headers.append('Access-Control-Allow-Origin', '*');
 
     // add the CORS headers to the response
