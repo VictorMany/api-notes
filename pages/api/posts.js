@@ -35,10 +35,6 @@ async function updateNote(req, res) {
         const payload = JSON.parse(req.body);
         const noteId = new ObjectId(payload._id);
 
-        delete payload._id
-
-        console.log("ACTUALIZANDO el payload", noteId)
-
         const result = await db.collection('notes').updateOne(
             { _id: noteId },
             {
@@ -49,8 +45,6 @@ async function updateNote(req, res) {
                     due_date: payload.due_date // Update the 'content' field
                 }
             });
-        console.log("EL RESULTADO DEL PUT ES", result)
-
         const insertedNote = await db.collection('notes').findOne({ _id: noteId });
 
         return res.json({ message: 'Note updated successfully', success: true, data: insertedNote });
@@ -59,15 +53,20 @@ async function updateNote(req, res) {
     }
 }
 
-async function addBadgesImg(req, res) {
+async function changeStatus(req, res) {
     try {
-        const payload = JSON.parse(req.body);
         const { db } = await connectToDatabase();
-        const noteId = new ObjectId(payload.id);
-
-        await db.collection('notes').updateOne({ _id: noteId }, { $set: { imgs: payload.imgs } });
-
-        return res.json({ message: 'Badges added successfully', success: true });
+        const payload = JSON.parse(req.body);
+        const noteId = new ObjectId(payload._id);
+        const result = await db.collection('notes').updateOne(
+            { _id: noteId },
+            {
+                $set: {
+                    is_completed: payload.is_completed,
+                }
+            });
+        const insertedNote = await db.collection('notes').findOne({ _id: noteId });
+        return res.json({ message: 'Note updated successfully', success: true, data: insertedNote });
     } catch (error) {
         return res.status(500).json({ message: error.message, success: false });
     }
@@ -88,7 +87,6 @@ async function deleteNote(req, res) {
 
 export default async function handler(req, res) {
     try {
-        // console.log(req.params)
         await connectToDatabase();
 
         switch (req.method) {
@@ -103,13 +101,8 @@ export default async function handler(req, res) {
                     await addNote(req, res);
                 }
                 break;
-
-            // case 'PUT':
-            //     await updateNote(req, res);
-            //     break;
-
             case 'PATCH':
-                await addBadgesImg(req, res);
+                await changeStatus(req, res);
                 break;
 
             case 'DELETE':
