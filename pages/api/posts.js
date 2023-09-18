@@ -29,10 +29,9 @@ async function addNote(req, res) {
 }
 
 async function updateNote(req, res) {
-    
+
     try {
         const { db } = await connectToDatabase();
-
         const payload = JSON.parse(req.body);
         const noteId = new ObjectId(payload._id);
 
@@ -53,10 +52,6 @@ async function updateNote(req, res) {
         console.log("EL RESULTADO DEL PUT ES", result)
 
         const insertedNote = await db.collection('notes').findOne({ _id: noteId });
-
-        res.setHeader('Access-Control-Allow-Origin', '*'); // Permite todos los orígenes (cambia '*' por el dominio específico si es necesario)
-        res.setHeader('Access-Control-Allow-Methods', 'PUT');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
         return res.json({ message: 'Note updated successfully', success: true, data: insertedNote });
     } catch (error) {
@@ -81,10 +76,10 @@ async function addBadgesImg(req, res) {
 async function deleteNote(req, res) {
     try {
         const { db } = await connectToDatabase();
-        const noteId = new ObjectId(req.body);
+        const payload = req.query;
 
+        const noteId = new ObjectId(payload._id);
         await db.collection('notes').deleteOne({ _id: noteId });
-
         return res.json({ message: 'Note deleted successfully', success: true });
     } catch (error) {
         return res.status(500).json({ message: error.message, success: false });
@@ -93,6 +88,7 @@ async function deleteNote(req, res) {
 
 export default async function handler(req, res) {
     try {
+        // console.log(req.params)
         await connectToDatabase();
 
         switch (req.method) {
@@ -101,12 +97,16 @@ export default async function handler(req, res) {
                 break;
 
             case 'POST':
-                await addNote(req, res);
+                if (JSON.parse(req.body)._id) {
+                    await updateNote(req, res);
+                } else {
+                    await addNote(req, res);
+                }
                 break;
 
-            case 'PUT':
-                await updateNote(req, res);
-                break;
+            // case 'PUT':
+            //     await updateNote(req, res);
+            //     break;
 
             case 'PATCH':
                 await addBadgesImg(req, res);
@@ -114,6 +114,14 @@ export default async function handler(req, res) {
 
             case 'DELETE':
                 await deleteNote(req, res);
+                break;
+
+            case 'OPTIONS':
+                // Manejar la solicitud OPTIONS aquí
+                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE'); // Agregar los métodos permitidos
+                res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Agregar los encabezados permitidos
+                res.setHeader('Access-Control-Allow-Origin', '*'); // Permitir cualquier origen (ajusta esto según tus necesidades)
+                res.status(200).end(); // Responder con éxito
                 break;
 
             default:
